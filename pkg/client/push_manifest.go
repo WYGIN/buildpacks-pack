@@ -2,8 +2,7 @@ package client
 
 import (
 	"context"
-
-	// "github.com/buildpacks/imgutil"
+	"github.com/buildpacks/imgutil"
 )
 
 type PushManifestOptions struct {
@@ -12,21 +11,25 @@ type PushManifestOptions struct {
 }
 // PushManifest implements commands.PackClient.
 func (c *Client) PushManifest(ctx context.Context, index string, opts PushManifestOptions) (imageID string, err error) {
-	// img, err := c.indexFactory.NewIndex(index, parseFalgsForImgUtil(opts))
+	manifestList, err := c.runtime.LookupImageIndex(index)
+	if err != nil {
+		return
+	}
 
-	// if err != nil {
-	// 	return err
-	// }
+	_, list, err := c.runtime.LoadFromImage(manifestList.ID())
+	if err != nil {
+		return
+	}
 
-	// if opts.Purge {
-	// 	if err := img.Delete(); err != nil {
-	// 		return err
-	// 	}
-	// }
+	_, _, err = list.Push(ctx, parseFalgsForImgUtil(opts))
+
+	if err == nil && opts.Purge {
+		c.runtime.RemoveManifests(ctx, []string{manifestList.ID()})
+	}
 
 	return imageID, err
 }
 
-// func parseFalgsForImgUtil(opts PushManifestOptions) (idxOptions imgutil.IndexOptions) {
-// 	return idxOptions
-// }
+func parseFalgsForImgUtil(opts PushManifestOptions) (idxOptions imgutil.IndexOptions) {
+	return idxOptions
+}
