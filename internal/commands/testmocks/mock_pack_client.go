@@ -8,8 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	client "github.com/buildpacks/pack/pkg/client"
 	gomock "github.com/golang/mock/gomock"
+
+	client "github.com/buildpacks/pack/pkg/client"
 )
 
 // MockPackClient is a mock of PackClient interface.
@@ -36,7 +37,7 @@ func (m *MockPackClient) EXPECT() *MockPackClientMockRecorder {
 }
 
 // AddManifest mocks base method.
-func (m *MockPackClient) AddManifest(arg0 context.Context, arg1 string, arg2 []string, arg3 client.ManifestAddOptions) (string, error) {
+func (m *MockPackClient) AddManifest(arg0 context.Context, arg1, arg2 string, arg3 client.ManifestAddOptions) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddManifest", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(string)
