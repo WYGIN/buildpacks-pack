@@ -58,6 +58,10 @@ func (c *Client) CreateManifest(ctx context.Context, name string, images []strin
 		fmt.Printf("%s\n", imageID)
 	}
 
+	if opts.Publish {
+		
+	}
+
 	return imageID, err
 }
 
