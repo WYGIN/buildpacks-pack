@@ -37,6 +37,7 @@ import (
 	"github.com/buildpacks/pack/pkg/buildpack"
 	"github.com/buildpacks/pack/pkg/image"
 	"github.com/buildpacks/pack/pkg/logging"
+	runtime "github.com/buildpacks/pack/pkg/runtime"
 )
 
 //go:generate mockgen -package testmocks -destination ../testmocks/mock_docker_client.go github.com/docker/docker/client CommonAPIClient
@@ -106,6 +107,37 @@ type Runtime interface {
 	ParseDigest(image string) (name.Digest, error)
 	// RemoveManifests will delete manifest/manifestList from the local stroage
 	RemoveManifests(ctx context.Context, names []string) (err error)
+}
+
+// IndexFactory is an interface representing the ability to create a ImageIndex/ManifestList.
+type IndexFactory interface {
+	NewIndex(reponame string, opts imgutil.IndexOptions) (imgutil.Index, error)
+}
+
+type Runtime interface {
+	// LookupManifestList looks up a manifest list with the specified name in the
+	// containers storage.
+	LookupImageIndex(name string) (index runtime.ImageIndex, err error)
+	// LoadFromImage reads the manifest list or image index, and additional
+	// information about where the various instances that it contains live, from an
+	// image record with the specified ID in local storage.
+	LoadFromImage(name string) (imageID string, index imgutil.Index, err error)
+	// ExpandNames takes unqualified names, parses them as image names, and returns
+	// the fully expanded result, including a tag.  Names which don't include a registry
+	// name will be marked for the most-preferred registry
+	ExpandIndexNames(names []string) (images []string, err error)
+	// ImageType returns the MediaType of the given image's format
+	ImageType(format string) (manifestType imgutil.MediaTypes)
+	// FindImage locates the locally-stored image which corresponds to a given name.
+	FindImage(name string) (name.Reference, imgutil.Image, error)
+	// parse name reference
+	ParseReference(image string) (name.Reference, error)
+	// parses the digest reference
+	ParseDigest(image string) (name.Digest, error)
+	// RemoveManifests will delete manifest/manifestList from the local stroage
+	RemoveManifests(ctx context.Context, names []string) (reports runtime.RemoveImageReport, errors []error)
+	// Fetch ManifestList from Registry with the given name
+	FetchIndex(name string) (imgutil.Index, error)
 }
 
 //go:generate mockgen -package testmocks -destination ../testmocks/mock_buildpack_downloader.go github.com/buildpacks/pack/pkg/client BuildpackDownloader
