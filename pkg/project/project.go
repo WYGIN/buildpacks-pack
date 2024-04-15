@@ -9,6 +9,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
 
+	"github.com/buildpacks/pack/pkg/dist"
 	"github.com/buildpacks/pack/pkg/logging"
 	"github.com/buildpacks/pack/pkg/project/types"
 	v01 "github.com/buildpacks/pack/pkg/project/v01"
@@ -63,6 +64,15 @@ func ReadProjectDescriptor(pathToFile string, logger logging.Logger) (types.Desc
 	warnIfTomlContainsKeysNotSupportedBySchema(version, tomlMetaData, logger)
 
 	return descriptor, validate(descriptor)
+}
+
+func ReadMultiArchProjectDescriptor(pathToFile string, targets []dist.Target, logger logging.Logger) (types.Descriptor, error) {
+	desc, err := ReadProjectDescriptor(pathToFile, logger)
+	if len(targets) != 0 {
+		desc.WithTargets = targets
+	}
+
+	return desc, err
 }
 
 func warnIfTomlContainsKeysNotSupportedBySchema(schemaVersion string, tomlMetaData toml.MetaData, logger logging.Logger) {

@@ -2,6 +2,8 @@ package types
 
 import (
 	"github.com/buildpacks/lifecycle/api"
+
+	"github.com/buildpacks/pack/pkg/dist"
 )
 
 type Script struct {
@@ -48,6 +50,7 @@ type Descriptor struct {
 	Project       Project                `toml:"project"`
 	Build         Build                  `toml:"build"`
 	Metadata      map[string]interface{} `toml:"metadata"`
+	WithTargets   []dist.Target          `toml:"targets"`
 	SchemaVersion *api.Version
 }
 

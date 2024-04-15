@@ -241,6 +241,20 @@ func (mr *MockPackClientMockRecorder) InspectManifest(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InspectManifest", reflect.TypeOf((*MockPackClient)(nil).InspectManifest), arg0, arg1)
 }
 
+// MultiArchBuild mocks base method.
+func (m *MockPackClient) MultiArchBuild(arg0 context.Context, arg1 client.BuildOptions) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MultiArchBuild", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// MultiArchBuild indicates an expected call of MultiArchBuild.
+func (mr *MockPackClientMockRecorder) MultiArchBuild(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MultiArchBuild", reflect.TypeOf((*MockPackClient)(nil).MultiArchBuild), arg0, arg1)
+}
+
 // NewBuildpack mocks base method.
 func (m *MockPackClient) NewBuildpack(arg0 context.Context, arg1 client.NewBuildpackOptions) error {
 	m.ctrl.T.Helper()

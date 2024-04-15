@@ -707,6 +707,10 @@ func (c *Client) Build(ctx context.Context, opts BuildOptions) error {
 	return c.logImageNameAndSha(ctx, opts.Publish, imageRef)
 }
 
+func (c *Client) MultiArchBuild(ctx context.Context, opts BuildOptions) error {
+	return nil
+}
+
 func extractSupportedLifecycleApis(labels map[string]string) ([]string, error) {
 	// sample contents of labels:
 	//    {io.buildpacks.builder.metadata:\"{\"lifecycle\":{\"version\":\"0.15.3\"},\"api\":{\"buildpack\":\"0.2\",\"platform\":\"0.3\"}}",
