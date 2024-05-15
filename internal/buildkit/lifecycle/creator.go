@@ -131,10 +131,14 @@ func (l *LifecycleExecution) Create(ctx context.Context, c *client.Client, build
 			llb.WithUIDGID(l.opts.Builder.UID(), l.opts.Builder.GID()), // add uid and gid for for the given `layers` dir
 		).
 		MkFile(mounter.ProjectPath(), fs.ModePerm, projectMetadata, llb.WithUIDGID(l.opts.Builder.UID(), l.opts.Builder.GID())).
-		Mkdir(mounter.AppDir(), fs.ModeDir, llb.WithUIDGID(l.opts.Builder.UID(), l.opts.Builder.GID())).
+		Mkdir(mounter.AppDir(), fs.ModeDir, llb.WithUIDGID(l.opts.Builder.UID(), l.opts.Builder.GID()))
 		// Use Add, cause: The AppPath can be either a directory or a tar file!
 		// The [Add] command is responsible for extracting tar and fetching remote files!
-		AddVolume(fmt.Sprintf("%s:%s", l.opts.AppPath, mounter.AppDir()))
+		// Add([]string{mounter.AppDir()}, "/workspace", options.ADD{
+		// 	Chown: fmt.Sprintf("%s:%s", strconv.Itoa(l.opts.Builder.UID()), strconv.Itoa(l.opts.Builder.GID())),
+		// 	Chmod: fmt.Sprintf("%s:%s", strconv.Itoa(l.opts.Builder.UID()), strconv.Itoa(l.opts.Builder.GID())),
+		// })
+		// AddVolume(fmt.Sprintf("%s:%s", l.opts.AppPath, mounter.AppDir()))
 	mounts = append(mounts, gatewayClient.Mount{
 		Dest: fmt.Sprintf("%s:%s", l.opts.AppPath, mounter.AppDir()),
 		MountType: pb.MountType_CACHE,
@@ -163,7 +167,7 @@ func (l *LifecycleExecution) Create(ctx context.Context, c *client.Client, build
 		// can we use SecretAsEnv, cause The ENV is exposed in ConfigFile whereas SecretAsEnv not! But are we using DinD?
 		// shall we add secret to builder instead of remodifying existing builder to add `CNB_REGISTRY_AUTH` 
 		// we can also reference a file as secret!
-		l.state = l.state.User(state.RootUser(runtime.GOOS)).AddArg(fmt.Sprintf("CNB_REGISTRY_AUTH=%s", "."))
+		l.state = l.state.User(state.RootUser(runtime.GOOS)).AddArg(fmt.Sprintf("CNB_REGISTRY_AUTH=%s", ".")) // {}
 	} else {
 		// TODO: WithDaemonAccess(l.opts.DockerHost)
 
@@ -227,22 +231,22 @@ func (l *LifecycleExecution) Create(ctx context.Context, c *client.Client, build
 				OutputDir: filepath.Join("exports", "local"),
 			},
 		},
-		CacheExports: []client.CacheOptionsEntry{
-			{
-				Type: "local",
-				Attrs: map[string]string{
-					"dest": filepath.Join("DinD", "cache"),
-				},
-			},
-		},
-		CacheImports: []client.CacheOptionsEntry{
-			{
-				Type: "local",
-				Attrs: map[string]string{
-					"src": filepath.Join("DinD", "cache"),
-				},
-			},
-		},
+		// CacheExports: []client.CacheOptionsEntry{
+		// 	{
+		// 		Type: "local",
+		// 		Attrs: map[string]string{
+		// 			"dest": filepath.Join("DinD", "cache"),
+		// 		},
+		// 	},
+		// },
+		// CacheImports: []client.CacheOptionsEntry{
+		// 	{
+		// 		Type: "local",
+		// 		Attrs: map[string]string{
+		// 			"src": filepath.Join("DinD", "cache"),
+		// 		},
+		// 	},
+		// },
 	}, "packerfile.v0", bldr.Build, nil)
 	if resp != nil {
 		fmt.Printf("configFile current: \n%s\n", resp.ExporterResponse[exptypes.ExporterImageConfigKey])
