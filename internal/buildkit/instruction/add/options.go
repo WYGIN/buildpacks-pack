@@ -3,62 +3,74 @@ package add
 import (
 	"github.com/buildpacks/pack/internal/buildkit/instruction"
 	"github.com/moby/buildkit/client/llb"
-	digest "github.com/opencontainers/go-digest"
+	"github.com/opencontainers/go-digest"
 )
 
-func KeepGitDir() func(* instruction.AddOp) error {
-	return func(ao *instruction.AddOp) error {
-		ao.KeepGitDir = true
-		return nil
-	}
-}
-
-func WithChecksum(checksum string) func(*instruction.AddOp) error {
-	return func(ao *instruction.AddOp) (err error) {
-		ao.Checksum, err = digest.Parse(checksum)
-		return err
-	}
-}
-
-func WithUserAndGroup(user, group string) func(*instruction.AddOp) error {
-	return func(ao *instruction.AddOp) error {
-		ao.Chown = llb.ChownOpt{
-			User: &llb.UserOpt{Name: user},
-			Group: &llb.UserOpt{Name: group},
-		}
-
-		return nil
-	}
-}
-
-func WithUIDGID(uid, gid int) func(*instruction.AddOp) error {
-	return func(ao *instruction.AddOp) error {
-		ao.Chown = llb.ChownOpt{
-			User: &llb.UserOpt{UID: uid},
-			Group: &llb.UserOpt{UID: gid},
-		}
-
-		return nil
-	}
-}
-
-func WithChmod(chmod ...uint16) func(*instruction.AddOp) error {
-	return func(ao *instruction.AddOp) error {
-		ao.Chmod = append(ao.Chmod, chmod...)
-		return nil
-	}
-}
-
-func Link() func(*instruction.AddOp) error {
-	return func(ao *instruction.AddOp) error {
+func Link() AddOption {
+	return func(ao *AddOp) error {
 		ao.Link = true
 		return nil
 	}
 }
 
-func Exclude(patterns ...string) func(*instruction.AddOp) error {
-	return func(ao *instruction.AddOp) error {
-		ao.Exclude = patterns
+func Exclude(patterns ...string) AddOption {
+	return func(ao *AddOp) error {
+		ao.Exclude = instruction.Exclude(patterns)
+		return nil
+	}
+}
+
+func KeepGitDir() AddOption {
+	return func(ao *AddOp) error {
+		ao.KeepGitDir = true
+		return nil
+	}
+}
+
+func WithChecksum(ref string) AddOption {
+	return func(ao *AddOp) (err error) {
+		checksum, err := digest.Parse(ref)
+		ao.Checksum = instruction.Checksum{Digest: checksum}
+		
+		return err
+	}
+}
+
+func WithUID(uid int) AddOption {
+	return func(ao *AddOp) error {
+		ao.Chown.User = &llb.UserOpt{UID: uid}
+		return nil
+	}
+}
+
+func WithUIDGID(uid, gid int) AddOption {
+	return func(ao *AddOp) (err error) {
+		err = WithUID(uid)(ao)
+		ao.Chown.Group = &llb.UserOpt{UID: gid}
+
+		return err
+	}
+}
+
+func WithUser(user string) AddOption {
+	return func(ao *AddOp) error {
+		ao.Chown.User = &llb.UserOpt{Name: user}
+		return nil
+	}
+}
+
+func WithUserAndGroup(user, group string) AddOption {
+	return func(ao *AddOp) (err error) {
+		err = WithUser(user)(ao)
+		ao.Chown.Group = &llb.UserOpt{Name: group}
+
+		return err
+	}
+}
+
+func WithChmod(perm uint32) AddOption {
+	return func(ao *AddOp) error {
+		ao.Chmod = instruction.Chmod(perm)
 		return nil
 	}
 }

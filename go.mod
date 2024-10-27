@@ -8,6 +8,8 @@ require (
 	github.com/apex/log v1.9.0
 	github.com/buildpacks/imgutil v0.0.0-20240605145725-186f89b2d168
 	github.com/buildpacks/lifecycle v0.19.6
+	github.com/containerd/platforms v0.2.1
+	github.com/distribution/reference v0.6.0
 	github.com/docker/cli v26.1.4+incompatible
 	github.com/docker/docker v26.1.5+incompatible
 	github.com/docker/go-connections v0.5.0
@@ -80,13 +82,11 @@ require (
 	github.com/containerd/containerd v1.7.16 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/containerd/log v0.1.0 // indirect
-	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.15.1 // indirect
 	github.com/containerd/ttrpc v1.2.3 // indirect
 	github.com/containerd/typeurl/v2 v2.1.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
-	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.8.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect

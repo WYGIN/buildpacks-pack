@@ -4,14 +4,26 @@ import (
 	"errors"
 
 	"github.com/buildpacks/pack/internal/buildkit/instruction"
+	"github.com/buildpacks/pack/internal/buildkit/instruction/add"
 	"github.com/buildpacks/pack/internal/buildkit/instruction/copy"
 )
 
 func WithInstructions(cmds ...instruction.Instruction) func(*instruction.OnBuildOp) error {
 	return func(obo *instruction.OnBuildOp) (err error) {
 		for _, cmd := range cmds {
-			switch cmd := cmd.(type) {
-			case instruction.ADD,
+			if err := WithInstruction(cmd)(obo); err != nil {
+				return err
+			}
+		}
+
+		return err
+	}
+}
+
+func WithInstruction(cmd instruction.Instruction) func(*instruction.OnBuildOp) error {
+	return func(obo *instruction.OnBuildOp) error {
+		switch cmd := cmd.(type) {
+			case add.ADD,
 				instruction.ARG,
 				instruction.CMD,
 				instruction.ENTRYPOINT,
@@ -33,9 +45,8 @@ func WithInstructions(cmds ...instruction.Instruction) func(*instruction.OnBuild
 				obo.CMDs = append(obo.CMDs, cmd)
 			default:
 				return errors.New("unsupported: [ONBUILD] INSTRUCTION")
-			}
 		}
 
-		return err
+		return nil
 	}
 }

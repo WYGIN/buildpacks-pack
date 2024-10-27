@@ -8,3 +8,10 @@ func WithLabels(labels ...instruction.KeyValuePair) func(*instruction.LabelOp) e
 		return nil
 	}
 }
+
+func AppendLabels(labels ...instruction.KeyValuePair) func(*instruction.LabelOp) error {
+	return func(lo *instruction.LabelOp) error {
+		lo.Labels = append(lo.Labels, labels...)
+		return nil
+	}
+}

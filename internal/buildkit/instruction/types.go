@@ -7,48 +7,44 @@ import (
 	"github.com/distribution/reference"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/solver/pb"
-	digest "github.com/opencontainers/go-digest"
+	"github.com/opencontainers/go-digest"
 	ocispecs "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type Instruction interface {
-	ToState() llb.State
+	ToState() (llb.State, error)
 }
 
-type ADD interface {
-	Instruction
-	WithOptions(...AddOptions)
+type HistoryCommiter interface {
+	Commit() error
 }
 
-type AddOptions func(op *AddOp) error
 
-type AddOp struct {
-	KeepGitDir bool
-	Checksum digest.Digest
-	chownChmod
-	link
-	exclude
+type ChownChmod struct {
+	Chown
+	Chmod
 }
 
-type chownChmod struct {
-	Chown llb.ChownOpt
-	Chmod []uint16
+type Chown llb.ChownOpt
+
+type Chmod os.FileMode
+
+type Link bool
+
+type Exclude []string
+
+type Checksum struct {
+	digest.Digest
 }
 
-type link struct {
-	Link bool
-}
-
-type exclude struct {
-	Exclude []string
-}
+type KeepGitDir bool
 
 type ARG interface {
 	Instruction
-	WithOptions(...ArgOptions)
+	WithOptions(...ArgOption) error
 }
 
-type ArgOptions func(*ArgOp) error
+type ArgOption func(*ArgOp) error
 
 type ArgOp struct {
 	Args llb.EnvList
@@ -56,10 +52,10 @@ type ArgOp struct {
 
 type CMD interface {
 	Instruction
-	WithOptions(...CmdOptions)
+	WithOptions(...CmdOption) error
 }
 
-type CmdOptions func(*CmdOp) error
+type CmdOption func(*CmdOp) error
 
 type CmdOp struct {
 	CmdForm
@@ -75,18 +71,18 @@ const (
 
 type COPY interface {
 	Instruction
-	WithOptions(...CopyOptions)
-	HasOption(CopyOptions) bool
+	WithOptions(...CopyOption) error
+	HasOption(CopyOption) bool
 }
 
-type CopyOptions func(*CopyOp) error
+type CopyOption func(*CopyOp) error
 
 type CopyOp struct {
 	From *llb.State
-	chownChmod
-	link
+	ChownChmod
+	Link
 	Parent bool
-	exclude
+	Exclude
 
 	// Source []string
 	// Dest string
@@ -94,10 +90,10 @@ type CopyOp struct {
 
 type ENTRYPOINT interface {
 	Instruction
-	WithOptions(...EntrypointOptions)
+	WithOptions(...EntrypointOption) error
 }
 
-type EntrypointOptions func(*EntrypointOp) error
+type EntrypointOption func(*EntrypointOp) error
 
 type EntrypointOp struct {
 	CmdForm
@@ -106,10 +102,10 @@ type EntrypointOp struct {
 
 type ENV interface {
 	Instruction
-	WithOptions(...EnvOptions)
+	WithOptions(...EnvOption) error
 }
 
-type EnvOptions func(*EnvOp) error
+type EnvOption func(*EnvOp) error
 
 type EnvOp struct {
 	EnvList llb.EnvList
@@ -117,10 +113,10 @@ type EnvOp struct {
 
 type EXPOSE interface {
 	Instruction
-	WithOptions(...ExposeOptions)
+	WithOptions(...ExposeOption) error
 }
 
-type ExposeOptions func(*ExposeOp) error
+type ExposeOption func(*ExposeOp) error
 
 type ExposeOp struct {
 	Expose []Port
@@ -140,10 +136,10 @@ const (
 
 type FROM interface {
 	Instruction
-	WithOptions(...FromOptions)
+	WithOptions(...FromOption) error
 }
 
-type FromOptions func(*FromOp) error
+type FromOption func(*FromOp) error
 
 type FromOp struct {
 	Platform ocispecs.Platform
@@ -152,11 +148,11 @@ type FromOp struct {
 
 type HEALTHCHECK interface {
 	Instruction
-	WithOptions(...HealthcheckOptions)
+	WithOptions(...HealthcheckOption) error
 	WithCMD(cmd CMD)
 }
 
-type HealthcheckOptions func(*HealthcheckOp) error
+type HealthcheckOption func(*HealthcheckOp) error
 
 type HealthcheckOp struct {
 	Interval time.Duration
@@ -168,10 +164,10 @@ type HealthcheckOp struct {
 
 type LABEL interface {
 	Instruction
-	WithOptions(...LabelOptions)
+	WithOptions(...LabelOption) error
 }
 
-type LabelOptions func(*LabelOp) error
+type LabelOption func(*LabelOp) error
 
 type LabelOp struct {
 	Labels []KeyValuePair
@@ -179,10 +175,10 @@ type LabelOp struct {
 
 type ONBUILD interface {
 	Instruction
-	WithOptions(...OnBuildOptions)
+	WithOptions(...OnBuildOption) error
 }
 
-type OnBuildOptions func(*OnBuildOp) error
+type OnBuildOption func(*OnBuildOp) error
 
 type OnBuildOp struct {
 	CMDs []Instruction
@@ -190,10 +186,10 @@ type OnBuildOp struct {
 
 type RUN interface {
 	Instruction
-	WithOptions(...RunOptions)
+	WithOptions(...RunOption) error
 }
 
-type RunOptions func(*RunOp) error
+type RunOption func(*RunOp) error
 
 type RunOp struct {
 	Mounts []llb.MountOption
@@ -203,10 +199,10 @@ type RunOp struct {
 
 type SHELL interface {
 	Instruction
-	WithOptions(...ShellOptions)
+	WithOptions(...ShellOption) error
 }
 
-type ShellOptions func(*ShellOp) error
+type ShellOption func(*ShellOp) error
 
 type ShellOp struct {
 	Executable string
@@ -215,21 +211,21 @@ type ShellOp struct {
 
 type STOPSIGNAL interface {
 	Instruction
-	WithOptions(...StopSignalOptions)
+	WithOptions(...StopSignalOption) error
 }
 
-type StopSignalOptions func(*StopSignalOp) error
+type StopSignalOption func(*StopSignalOp) error
 
 type StopSignalOp struct {
 	StopSignal os.Signal
 }
 
-type USER interface{
+type USER interface {
 	Instruction
-	WithOptions(...UserOptions)
+	WithOptions(...UserOption) error
 }
 
-type UserOptions func(*UserOp) error
+type UserOption func(*UserOp) error
 
 type UserOp struct {
 	User, Group llb.UserOpt
@@ -237,21 +233,21 @@ type UserOp struct {
 
 type VOLUME interface {
 	Instruction
-	WithOptions(...VolumeOptions)
+	WithOptions(...VolumeOption) error
 }
 
-type VolumeOptions func(*VolumeOp) error
+type VolumeOption func(*VolumeOp) error
 
 type VolumeOp struct {
 	Volumes []string
 }
 
-type WORKDIR interface{
+type WORKDIR interface {
 	Instruction
-	WithOptions(...WorkDirOptions)
+	WithOptions(...WorkDirOption) error
 }
 
-type WorkDirOptions func(*WorkDirOp) error
+type WorkDirOption func(*WorkDirOp) error
 
 type WorkDirOp struct {
 	WorkDir string
@@ -260,4 +256,3 @@ type WorkDirOp struct {
 type KeyValuePair struct {
 	Key, Value string
 }
-
