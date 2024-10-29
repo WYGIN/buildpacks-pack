@@ -13,6 +13,14 @@ func (l Link) FormatFlag() string {
 	return ""
 }
 
+func (p Parent) FormatFlag() string {
+	if p {
+		return fmt.Sprintf("--parent=%t", p)
+	}
+
+	return ""
+}
+
 func (e Exclude) FormatFlag() string {
 	builder := strings.Builder{}
 
@@ -58,6 +66,10 @@ func (c Chmod) FormatFlag() string {
 	}
 
 	return fmt.Sprintf("--chmod=%o", c)
+}
+
+func (c Chmod) IsNil() bool {
+	return c == 0o0
 }
 
 func (ck Checksum) FormatFlag() string {

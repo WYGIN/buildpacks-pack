@@ -1,6 +1,7 @@
 package add
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -8,13 +9,15 @@ var _ AddCMDStringer = (*addCMDStringer)(nil)
 
 func (as addCMDStringer) String() string {
 	return as.
-		Sources().
-		Dest().
-		Exclude().
+		KeepGitDir().
+		Checksum().
 		Chown().
 		Chmod().
-		Checksum().
-		KeepGitDir().
+		Link().
+		Parent().
+		Exclude().
+		Sources().
+		Dest().
 		toString()
 }
 
@@ -48,6 +51,20 @@ func (as *addCMDStringer) Link() *addCMDStringer {
 	} else {
 		as.builder.WriteString(
 			" " + as.options.Link.FormatFlag(),
+		)
+	}
+
+	return as
+}
+
+func (as *addCMDStringer) Parent() *addCMDStringer {
+	if strings.HasSuffix(as.builder.String(), " ") {
+		as.builder.WriteString(
+			as.options.Parent.FormatFlag(),
+		)
+	} else {
+		as.builder.WriteString(
+			" " + as.options.Parent.FormatFlag(),
 		)
 	}
 
@@ -111,5 +128,5 @@ func (as *addCMDStringer) KeepGitDir() *addCMDStringer {
 }
 
 func (as *addCMDStringer) toString() string {
-	return as.builder.String()
+	return fmt.Sprintf("%s # buildkit", as.builder.String())
 }

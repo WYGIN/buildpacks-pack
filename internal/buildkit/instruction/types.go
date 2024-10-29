@@ -33,6 +33,8 @@ type Link bool
 
 type Exclude []string
 
+type Parent bool
+
 type Checksum struct {
 	digest.Digest
 }
