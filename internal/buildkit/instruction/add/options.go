@@ -6,23 +6,9 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-func Link() AddOption {
-	return func(ao *AddOp) error {
-		ao.Link = true
-		return nil
-	}
-}
-
 func Exclude(patterns ...string) AddOption {
 	return func(ao *AddOp) error {
 		ao.Exclude = instruction.Exclude(patterns)
-		return nil
-	}
-}
-
-func KeepGitDir() AddOption {
-	return func(ao *AddOp) error {
-		ao.KeepGitDir = true
 		return nil
 	}
 }
@@ -73,4 +59,36 @@ func WithChmod(perm uint32) AddOption {
 		ao.Chmod = instruction.Chmod(perm)
 		return nil
 	}
+}
+
+func WithCmdIndex(idx uint) AddOption {
+	return func(ao *AddOp) error {
+		ao.cmdIndex = idx
+		return nil
+	}
+}
+
+var IgnoreCache AddOption = func(ao *AddOp) error {
+	ao.ignoreCache = true
+	return nil
+}
+
+var Link AddOption = func(ao *AddOp) error {
+	ao.Link = true
+	return nil
+}
+
+var KeepGitDir AddOption = func(ao *AddOp) error {
+	ao.KeepGitDir = true
+	return nil
+}
+
+var AttemptUnpack AddOption = func(ao *AddOp) error {
+	ao.attemptUnpack = true
+	return nil
+}
+
+var OnBuildCMD AddOption = func(ao *AddOp) error {
+	ao.onBuildCmd = true
+	return nil
 }

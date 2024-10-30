@@ -25,6 +25,11 @@ type AddOp struct {
 	instruction.Exclude
 	instruction.Link
 	instruction.Parent
+
+	ignoreCache bool
+	cmdIndex uint
+	attemptUnpack bool
+	onBuildCmd bool
 }
 
 type add struct {
@@ -32,8 +37,13 @@ type add struct {
 	options  *AddOp
 	sources  []string
 	dest     string
+
+	cmd string
+	currentCmdIndex, totalCmdCount *uint
+
 	platform ocispecs.Platform
 	client client.Client
+
 }
 
 type SourcesAndDest struct {

@@ -145,7 +145,8 @@ func isAddCommand(a add) bool {
 	switch {
 	case a.options.Checksum.String() != "",
 		instruction.IsGitSource(a.sources[0]),
-		instruction.IsHttpSource(a.sources[0]):	
+		instruction.IsHttpSource(a.sources[0]),
+		a.options.attemptUnpack:
 			return true
 	}
 

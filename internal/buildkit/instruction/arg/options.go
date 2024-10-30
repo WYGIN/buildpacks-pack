@@ -7,7 +7,7 @@ import (
 
 func WithKeyValue(key, value string) func(*instruction.ArgOp) error {
 	return func(ao *instruction.ArgOp) error {
-		ao.Args = make(llb.EnvList, 1)
+		ao.Args = llb.EnvList{}
 		ao.Args.AddOrReplace(key, value)
 		return nil
 	}
@@ -15,7 +15,7 @@ func WithKeyValue(key, value string) func(*instruction.ArgOp) error {
 
 func WithKeyValuePair(kv ...instruction.KeyValuePair) func(*instruction.ArgOp) error {
 	return func(ao *instruction.ArgOp) error {
-		ao.Args = make(llb.EnvList, 0, len(kv))
+		ao.Args = llb.EnvList{}
 		for _, kvPair := range kv {
 			ao.Args.AddOrReplace(kvPair.Key, kvPair.Value)
 		}

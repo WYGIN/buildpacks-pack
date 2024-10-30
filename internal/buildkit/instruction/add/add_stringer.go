@@ -128,5 +128,5 @@ func (as *addCMDStringer) KeepGitDir() *addCMDStringer {
 }
 
 func (as *addCMDStringer) toString() string {
-	return fmt.Sprintf("%s # buildkit", as.builder.String())
+	return fmt.Sprintf("%s # buildpack", as.builder.String())
 }
